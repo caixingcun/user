@@ -2,18 +2,14 @@ package com.test.controller;
 
 import com.google.gson.Gson;
 import com.test.bean.*;
-import com.test.db.AccountManager;
 import com.test.exception.ForbiddenException;
 import com.test.exception.ServiceInnerException;
 import com.test.util.TokenUtil;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.io.UnsupportedEncodingException;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.List;
 
 @RestController
@@ -70,9 +66,30 @@ public class LoginController {
                 throw new ForbiddenException("用户名或密码错误");
             }
             String token = TokenUtil.generalToken(account);
-            System.out.println("login_account"+account);
-            System.out.println("login_token---" + token);
             int update = jdbcTemplate.update(String.format("UPDATE account SET token = \'%s\'  WHERE account = %s", token,account ));
+            if (update == 1) {
+                return new Gson().toJson(new TokenBean(account, token));
+            }
+            throw new ServiceInnerException("sql操作失败");
+        }
+        throw new ForbiddenException("当前账户不存在");
+
+    }
+
+    /**
+     * 登录
+     *@param  token
+     * @return {"userName":"cxc","token":"123"}
+     */
+    @RequestMapping(value = "/api/logout", method = RequestMethod.GET)
+    @ResponseBody
+    public String logout(@RequestHeader("token")String token ) throws UnsupportedEncodingException {
+        String account = TokenUtil.getAccount(token);
+
+        List<String> query = jdbcTemplate.query(String.format("SELECT pwd FROM account WHERE account = %s LIMIT 1",account), (resultSet, i) -> resultSet.getString("pwd"));
+
+        if (query.size() == 1) {
+            int update = jdbcTemplate.update(String.format("UPDATE account SET token = Null  WHERE account = %s",account ));
             if (update == 1) {
                 return new Gson().toJson(new TokenBean(account, token));
             }
@@ -89,7 +106,7 @@ public class LoginController {
      * @return {"msg":"123"}
      */
 
-    @RequestMapping(value = "/user/change-pwd", method = RequestMethod.POST)
+    @RequestMapping(value = "/user/changepwd", method = RequestMethod.POST)
     @ResponseBody
     public String forgetPwd(@RequestParam("account")String account,@RequestParam("password")String password,@RequestParam("new_password")String newPassword) {
 
@@ -108,5 +125,6 @@ public class LoginController {
 
         throw new ServiceInnerException("sql更新异常");
     }
+
 
 }

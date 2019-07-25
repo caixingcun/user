@@ -27,8 +27,7 @@ public class UserApplication {
     public FilterRegistrationBean filterRegistrationBean() {
         FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean();
         filterRegistrationBean.setFilter(new TokenFilter(jdbcTemplate));
-        filterRegistrationBean.setFilter(new CharacterEncodingFilter());
-        List<String> urlPatterns = new ArrayList<String>();
+        List<String> urlPatterns = new ArrayList<>();
 
         urlPatterns.add("/api/*");
         filterRegistrationBean.setUrlPatterns(urlPatterns);
