@@ -40,7 +40,7 @@ public class NoteController {
         if (id == 0) {
             update1 = jdbcTemplate.update(String.format("INSERT note(account,content,time)VALUES(%s,\'%s\',\'%s\')", account, content, time));
         }else{
-            update1 = jdbcTemplate.update(String.format("UPDATE note SET content = \'%s\',time = \'%s\' WHERE account = %s AND n_id = %d"), content, time, account, id);
+            update1 = jdbcTemplate.update(String.format("UPDATE note SET content = \'%s\',time = \'%s\' WHERE account = %s AND n_id = %d", content, time, account, id));
         }
         if (update1 == 1) {
             return new Gson().toJson(new MsgBean("保存成功"));
