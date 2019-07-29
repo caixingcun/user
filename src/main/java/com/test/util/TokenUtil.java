@@ -21,7 +21,7 @@ public class TokenUtil {
     /**
      * 过期时间15分钟
      */
-    private static final long EXPIRE_TIME = 15 * 60 * 1000;
+    private static final long EXPIRE_TIME = 24 * 60 * 60 * 1000;
 
     /**
      * token 私钥
@@ -58,6 +58,7 @@ public class TokenUtil {
 
     /**
      * 生成token
+     *
      * @param account
      * @return
      */
@@ -77,7 +78,6 @@ public class TokenUtil {
             return null;
         }
     }
-
 
 
     public static void main(String[] args) throws UnsupportedEncodingException {

@@ -2,6 +2,7 @@ package com.test.controller;
 
 import com.google.gson.Gson;
 import com.test.bean.*;
+import com.test.exception.BadRequestException;
 import com.test.exception.ForbiddenException;
 import com.test.exception.ServiceInnerException;
 import com.test.util.TokenUtil;
@@ -35,7 +36,7 @@ public class LoginController {
 
         List<Object> query = jdbcTemplate.query(String.format("SELECT * FROM account where account = %s limit 1", account), (resultSet, i) -> "");
         if (query.size() == 1) {
-            throw new ForbiddenException("当前账号已存在");
+            throw new BadRequestException("当前账号已存在");
         }
 
         String token = TokenUtil.generalToken(account);
@@ -63,7 +64,7 @@ public class LoginController {
 
         if (query.size() == 1) {
             if (!query.get(0).trim().equals(password.trim())) {
-                throw new ForbiddenException("用户名或密码错误");
+                throw new BadRequestException("用户名或密码错误");
             }
             String token = TokenUtil.generalToken(account);
             int update = jdbcTemplate.update(String.format("UPDATE account SET token = \'%s\'  WHERE account = %s", token,account ));
@@ -72,7 +73,7 @@ public class LoginController {
             }
             throw new ServiceInnerException("sql操作失败");
         }
-        throw new ForbiddenException("当前账户不存在");
+        throw new BadRequestException("当前账户不存在");
 
     }
 
@@ -91,11 +92,11 @@ public class LoginController {
         if (query.size() == 1) {
             int update = jdbcTemplate.update(String.format("UPDATE account SET token = Null  WHERE account = %s",account ));
             if (update == 1) {
-                return new Gson().toJson(new TokenBean(account, token));
+                return new Gson().toJson(new MsgBean("登出成功"));
             }
             throw new ServiceInnerException("sql操作失败");
         }
-        throw new ForbiddenException("当前账户不存在");
+        throw new BadRequestException("当前账户不存在");
 
     }
 
@@ -112,7 +113,7 @@ public class LoginController {
 
         List<Object> query = jdbcTemplate.query(String.format("SELECT * FROM account WHERE account=%s AND pwd = %s", account, password), (resultSet, i) -> "");
         if (query.size() != 1) {
-            throw new ForbiddenException("账号名或密码错误");
+            throw new BadRequestException("账号名或密码错误");
         }
 
         int update = jdbcTemplate.update(String.format("UPDATE account SET pwd = %s WHERE account = %s AND pwd = %s", newPassword, account, password));

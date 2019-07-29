@@ -20,14 +20,13 @@ public class UserApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(UserApplication.class, args);
-
     }
 
     @Bean
     public FilterRegistrationBean filterRegistrationBean() {
         FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean();
         filterRegistrationBean.setFilter(new TokenFilter(jdbcTemplate));
-        List<String> urlPatterns = new ArrayList<>();
+        List<String> urlPatterns = new ArrayList<String>();
 
         urlPatterns.add("/api/*");
         filterRegistrationBean.setUrlPatterns(urlPatterns);
