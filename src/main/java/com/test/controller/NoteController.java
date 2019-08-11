@@ -113,7 +113,7 @@ public class NoteController {
     @RequestMapping(value = "/api/note/{id}", method = RequestMethod.DELETE)
     @ResponseBody
     public String deleteNote(@RequestHeader("token") String token, @PathVariable("id") int id) {
-        // 插入数据
+        // 删除数据
         String account = TokenUtil.getAccount(token);
         int update = jdbcTemplate.update(String.format("DELETE  FROM note WHERE n_id = %d AND account = %s", id, account));
 

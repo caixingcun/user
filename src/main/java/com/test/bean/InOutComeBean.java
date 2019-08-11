@@ -1,12 +1,20 @@
 package com.test.bean;
 
-public class MoneyBean {
-    private String money;
+public class InOutComeBean {
+    private Double money;
     private String reason;
     private String create_time;
+    private Long i_id;
 
+    public void setI_id(Long i_id) {
+        this.i_id = i_id;
+    }
 
-    public String getMoney() {
+    public Long getI_id() {
+        return i_id;
+    }
+
+    public Double getMoney() {
         return money;
     }
 
@@ -18,7 +26,7 @@ public class MoneyBean {
         return create_time;
     }
 
-    public void setMoney(String money) {
+    public void setMoney(Double money) {
         this.money = money;
     }
 
