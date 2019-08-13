@@ -35,11 +35,11 @@ public class InvestTemperatureController {
     @RequestMapping(value = "/api/temperature", method = RequestMethod.POST)
     @ResponseBody
     public String template(@RequestHeader("token") String token,
-                       @RequestParam("create_time") String create_time,
-                       @RequestParam("index_type") String index_type,
-                       @RequestParam("temperature") String temperature,
-                       @RequestParam("code_in") String code_in,
-                       @RequestParam("code_out") String code_out) {
+                           @RequestParam("create_time") String create_time,
+                           @RequestParam("index_type") String index_type,
+                           @RequestParam("temperature") String temperature,
+                           @RequestParam("code_in") String code_in,
+                           @RequestParam("code_out") String code_out) {
         // 插入数据
 
         String account = TokenUtil.getAccount(token);
@@ -72,24 +72,25 @@ public class InvestTemperatureController {
 
         if (list.size() == 0) {
             //插入sql
-            int result = jdbcTemplate.update(String.format("INSERT invest_temperature(create_time,index_type,templature,code_in,code_out) VALUES(\'%s\',\'%s\',%s,\'%s\',\'%s\')", create_time, index_type, temperature, code_in, code_out));
+            int result = jdbcTemplate.update(String.format("INSERT invest_temperature(create_time,index_type,temperature,code_in,code_out) VALUES(\'%s\',\'%s\',%s,\'%s\',\'%s\')", create_time, index_type, temperature, code_in, code_out));
             if (result == 1) {
                 return new Gson().toJson(new MsgBean("保存成功"));
-            }else{
+            } else {
                 throw new BadRequestException("数据库操作失败");
             }
         } else {
             //更新sql
             long a_id = list.get(0).getA_id();
-            int result = jdbcTemplate.update(String.format("UPDATE invest_temperature SET templature = \'%s\',code_in = \'%s\' ,code_out = \'%s\',index_type = \'%s\',create_time = \'%s\' WHERE a_id = %s", temperature, code_in, code_out, index_type, create_time, a_id));
+            int result = jdbcTemplate.update(String.format("UPDATE invest_temperature SET temperature = \'%s\',code_in = \'%s\' ,code_out = \'%s\',index_type = \'%s\',create_time = \'%s\' WHERE a_id = %s", temperature, code_in, code_out, index_type, create_time, a_id));
             if (result == 1) {
                 return new Gson().toJson(new MsgBean("更新成功"));
-            }else{
+            } else {
                 throw new BadRequestException("数据库操作失败");
 
             }
         }
     }
+
 
     /**
      * 获取所有数据
@@ -102,6 +103,29 @@ public class InvestTemperatureController {
         // 插入数据
 
         List<TemplaterBean> list = jdbcTemplate.query(String.format("SELECT * FROM invest_temperature"), (resultSet, i) -> {
+            TemplaterBean templaterBean = new TemplaterBean();
+            templaterBean.setTemplature(resultSet.getDouble("temperature"));
+            templaterBean.setCode_in(resultSet.getString("code_in"));
+            templaterBean.setCode_out(resultSet.getString("code_out"));
+            templaterBean.setCreate_time(resultSet.getString("create_time"));
+            templaterBean.setIndex_type(resultSet.getString("index_type"));
+            templaterBean.setA_id(resultSet.getInt("a_id"));
+            return templaterBean;
+        });
+        return new Gson().toJson(list);
+    }
+
+    /**
+     * 获取所有数据
+     *
+     * @return
+     */
+    @RequestMapping(value = "/api/temperature/{create_time}", method = RequestMethod.GET)
+    @ResponseBody
+    public String getTemperature(@PathVariable("create_time") int create_time) {
+        // 插入数据
+
+        List<TemplaterBean> list = jdbcTemplate.query(String.format("SELECT * FROM invest_temperature WHERE create_time = \'%s\'",create_time), (resultSet, i) -> {
             TemplaterBean templaterBean = new TemplaterBean();
             templaterBean.setTemplature(resultSet.getDouble("temperature"));
             templaterBean.setCode_in(resultSet.getString("code_in"));
