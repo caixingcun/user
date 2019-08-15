@@ -1,11 +1,16 @@
 package com.test.bean;
 
 public class UserInfoBean {
-    private String name;
-    private int age;
-    private int gender;
-    private String header;
+    private int id = 0;
+    private String nickname = "";
+    private String header = "";
+    public int getId() {
+        return id;
+    }
 
+    public void setId(int id) {
+        this.id = id;
+    }
     public String getHeader() {
         return header;
     }
@@ -14,29 +19,11 @@ public class UserInfoBean {
         this.header = header;
     }
 
-    public String getName() {
-        return name;
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
     }
 
-    public int getAge() {
-        return age;
+    public String getNickname() {
+        return nickname;
     }
-
-    public int getGender() {
-        return gender;
-    }
-
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setAge(int age) {
-        this.age = age;
-    }
-
-    public void setGender(int agender) {
-        this.gender = agender;
-    }
-
 }
