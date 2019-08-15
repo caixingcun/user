@@ -1,6 +1,7 @@
 package com.test.controller;
 
 import com.google.gson.Gson;
+import com.test.exception.BadRequestException;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -17,59 +18,59 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @RestController
 public class PicController {
+    //    public static final String PICTURE_PATH = "D:\\picsoup\\picture\\";
 //    public static final String PICTURE_PATH = "D:\\picsoup\\picture\\";
-//    public static final String PICTURE_PATH = "D:\\picsoup\\picture\\";
-    public static final String PICTURE_PATH = "/pic/";
+    public static final String PICTURE_PATH = "pic"+File.separator;
 
-    @RequestMapping("/hello/{name}")
-    public String hello(@PathVariable("name") String name) {
-        return "provider: hello"+name;
+
+    /**
+     * 获取图片子文件夹
+     *
+     * @return
+     * @throws ParseException
+     */
+    @RequestMapping("/pic/dirs")
+    public String pic_sub_dir() throws ParseException {
+        File file = new File(PICTURE_PATH);
+        File[] files = file.listFiles();
+        List<String> childDirNames = Stream.of(files)
+                .map(file1 -> file1.getName())
+                .collect(Collectors.toList());
+        return new Gson().toJson(childDirNames);
     }
 
 
-    @RequestMapping(value = "/dates/{date}",method = RequestMethod.GET)
-    public String dates(@PathVariable("date") String date) throws ParseException {
-
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        sdf.parse(date);
-        List<String> list = new ArrayList<>();
-        List<String> abcd = Arrays.asList("a", "b", "c", "d", "e", "f", "g", "h", "i", "j");
-        for (String s : abcd) {
-            String s1 = date + "-" + s;
-            File file = new File(PICTURE_PATH+ s1);
-            if (file.exists()) {
-                list.add(s1);
-            }
-        }
-
-        return new Gson().toJson(list);
+    /**
+     * 获取图片子文件夹
+     *
+     * @return
+     * @throws ParseException
+     */
+    @RequestMapping("/pic/dir/{dir}}")
+    public String pics(@PathVariable("dir") String dir) throws ParseException {
+        File file = new File(PICTURE_PATH + dir);
+        File[] files = file.listFiles();
+        List<String> childDirNames = Stream.of(files)
+                .map(file1 -> file1.getName())
+                .collect(Collectors.toList());
+        return new Gson().toJson(childDirNames);
     }
 
-    @RequestMapping("/pics/{date_a}")
-    public String pics(@PathVariable("date_a") String date_a) throws ParseException {
-        List<String> list = new ArrayList<>();
-        File file = new File(PICTURE_PATH + date_a);
-        if (file.exists()) {
-            File[] files = file.listFiles();
-            for (File file1 : files) {
-                list.add(file1.getName());
-            }
-        }
 
-        return new Gson().toJson(list);
-    }
+    @RequestMapping(path = "/pic/dir/pic/{dir}/{file}", method = RequestMethod.GET)
+    public ResponseEntity<FileSystemResource> exportPic(@PathVariable("dir") String dir, @PathVariable("file") String file) throws Exception {
 
-    @RequestMapping(path = "pic/{date_a}/{fileName}", method = RequestMethod.GET)
-    public ResponseEntity<FileSystemResource> exportPic(@PathVariable("date_a") String date_a, @PathVariable("fileName") String fileName) throws Exception {
-        System.out.println(new File(PICTURE_PATH+ date_a, fileName).getAbsolutePath()+" ---");
-        File file = new File(PICTURE_PATH + date_a, fileName.endsWith(".jpg") ? fileName : fileName + ".jpg");
-        if (!file.exists()) {
-            throw new Exception("当前图片路径不存在");
+        File imgFile = new File(PICTURE_PATH + dir + File.separator + file);
+        if (!imgFile.exists()) {
+            throw new BadRequestException("当前图片路径不存在");
         }
-        return export(file);
+        return export(imgFile);
     }
 
 
