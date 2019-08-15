@@ -93,6 +93,71 @@ public class InvestTemperatureController {
 
 
     /**
+     * 提交 某一日 获取所有数据
+     *
+     * @return
+     */
+    @RequestMapping(value = "/api/temperatures", method = RequestMethod.POST)
+    @ResponseBody
+    public String postTemplates(@RequestHeader("token") String token, @RequestBody List<TemplaterBean> beans) {
+        // 插入数据
+        // 插入数据
+        String account = TokenUtil.getAccount(token);
+
+        for (TemplaterBean bean : beans) {
+            String index_type = bean.getIndex_type();
+            String create_time = bean.getCreate_time();
+            double temperature = bean.getTemplature();
+            String code_in = bean.getCode_in();
+            String code_out = bean.getCode_out();
+
+            List<Integer> admin_list = jdbcTemplate.query(String.format("SELECT * FROM account WHERE account = \'%s\'", account), new RowMapper<Integer>() {
+                @Override
+                public Integer mapRow(ResultSet resultSet, int i) throws SQLException {
+                    int is_admin = resultSet.getInt("is_admin");
+                    return is_admin;
+                }
+            });
+
+            if (admin_list.size() == 0 || admin_list.get(0) != 1) {
+                throw new BadRequestException("当前账户没有管理员操作权限，不能提交数据");
+            }
+
+            if (!Arrays.asList(Constants.INDEXS).contains(index_type)) {
+                throw new BadRequestException("提交的指数不存在");
+            }
+
+            List<TemplaterBean> list = jdbcTemplate.query(String.format("SELECT * FROM invest_temperature WHERE create_time = \'%s\' AND index_type = \'%s\'", create_time, index_type),
+                    (resultSet, i) -> {
+                        TemplaterBean templaterBean = new TemplaterBean();
+                        templaterBean.setTemplature(resultSet.getDouble("temperature"));
+                        templaterBean.setCode_in(resultSet.getString("code_in"));
+                        templaterBean.setCode_out(resultSet.getString("code_out"));
+                        templaterBean.setCreate_time(resultSet.getString("create_time"));
+                        templaterBean.setIndex_type(resultSet.getString("index_type"));
+                        templaterBean.setA_id(resultSet.getInt("a_id"));
+                        return templaterBean;
+                    });
+
+            if (list.size() == 0) {
+                //插入sql
+                int result = jdbcTemplate.update(String.format("INSERT invest_temperature(create_time,index_type,temperature,code_in,code_out) VALUES(\'%s\',\'%s\',%s,\'%s\',\'%s\')", create_time, index_type, temperature, code_in, code_out));
+                if (result != 1) {
+                    throw new BadRequestException("数据库操作失败");
+                }
+            } else {
+                //更新sql
+                long a_id = list.get(0).getA_id();
+                int result = jdbcTemplate.update(String.format("UPDATE invest_temperature SET temperature = \'%s\',code_in = \'%s\' ,code_out = \'%s\',index_type = \'%s\',create_time = \'%s\' WHERE a_id = %s", temperature, code_in, code_out, index_type, create_time, a_id));
+                if (result != 1) {
+                    throw new BadRequestException("数据库操作失败");
+                }
+            }
+        }
+        return new Gson().toJson(new MsgBean("提交成功"));
+    }
+
+    /**
      * 获取所有数据
      *
      * @return
@@ -115,6 +180,7 @@ public class InvestTemperatureController {
         return new Gson().toJson(list);
     }
 
+
     /**
      * 获取所有数据
      *
@@ -125,7 +191,7 @@ public class InvestTemperatureController {
     public String getTemperature(@PathVariable("create_time") int create_time) {
         // 插入数据
 
-        List<TemplaterBean> list = jdbcTemplate.query(String.format("SELECT * FROM invest_temperature WHERE create_time = \'%s\'",create_time), (resultSet, i) -> {
+        List<TemplaterBean> list = jdbcTemplate.query(String.format("SELECT * FROM invest_temperature WHERE create_time = \'%s\'", create_time), (resultSet, i) -> {
             TemplaterBean templaterBean = new TemplaterBean();
             templaterBean.setTemplature(resultSet.getDouble("temperature"));
             templaterBean.setCode_in(resultSet.getString("code_in"));
