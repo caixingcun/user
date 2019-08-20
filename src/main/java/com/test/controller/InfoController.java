@@ -68,7 +68,7 @@ public class InfoController {
             int is_admin = resultSet.getInt("is_admin");
             return is_admin == 1;
         });
-        if (query.size() > 0 || query.get(0)) {
+        if (query.size() > 0) {
             return new Gson().toJson(new MsgBean("当前账户是管理员"));
         } else {
             throw new BadRequestException("当前账户不是管理员");
